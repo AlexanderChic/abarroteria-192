@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🏪 Sistema CRUD Abarrotería
 
 Sistema de inventario y gestión de productos para abarroterías desarrollado con HTML, CSS y JavaScript vanilla.
@@ -168,3 +169,6 @@ Este proyecto es de código abierto y libre para uso personal y comercial.
 **Desarrollado con ❤️ para pequeños negocios**
 
 ¿Te gustó el proyecto? ⭐ Dale una estrella en GitHub
+=======
+# abarroteria-crud
+>>>>>>> b3f9e7b0d1ab3a396891c56fd942251a511a9efe
