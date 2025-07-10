@@ -1,0 +1,192 @@
+{
+  "categories": [
+    {
+      "id": "1752109509681el05f",
+      "name": "Abarrotes",
+      "description": "Productos básicos y secos que se utilizan para preparar comidas del día a día en los hogares guatemaltecos.",
+      "subcategories": [
+        "Arroz",
+        "Frijol negro",
+        "Frijol rojo",
+        "Pastas fideos",
+        "Coditos",
+        "Spaghetti",
+        "Harina de maíz Maseca",
+        "Del Comal",
+        "Harina de trigo",
+        "Azúcar",
+        "Sal",
+        "Consomés",
+        "Cubitos Maggi",
+        "Knorr",
+        "Caldos en polvo"
+      ],
+      "createdAt": "2025-07-10T01:05:09.681Z",
+      "updatedAt": "2025-07-10T01:05:09.681Z"
+    },
+    {
+      "id": "1752109650506whx6z",
+      "name": "Lácteos",
+      "description": "Productos derivados de la leche, esenciales para el desayuno o preparación de platillos típicos.",
+      "subcategories": [
+        "Leche líquida entera",
+        "Leche deslactosada",
+        "Leche en polvo",
+        "Queso fresco",
+        "Queso seco",
+        "Mantequilla",
+        "Crema"
+      ],
+      "createdAt": "2025-07-10T01:07:30.506Z",
+      "updatedAt": "2025-07-10T01:07:30.506Z"
+    },
+    {
+      "id": "1752110079183fxjk1",
+      "name": "Panadería",
+      "description": "Productos horneados listos para consumo, ideales para acompañar café o como merienda.",
+      "subcategories": [
+        "Pan francés",
+        "Pan dulce campechanas",
+        "Conchas",
+        "Pan de caja Bimbo",
+        "Galletas Chiky",
+        "Gama",
+        "Club Social"
+      ],
+      "createdAt": "2025-07-10T01:14:39.183Z",
+      "updatedAt": "2025-07-10T01:14:39.183Z"
+    },
+    {
+      "id": "1752110277783t33d1",
+      "name": "Bebidas",
+      "description": "Líquidos listos para consumir o preparar, tanto naturales como procesados.",
+      "subcategories": [
+        "Gaseosas",
+        "Jugos naturales",
+        "Jugos en caja",
+        "Refrescos en polvo",
+        "Agua pura en botella",
+        "Agua en garrafón",
+        "Café",
+        "Té"
+      ],
+      "createdAt": "2025-07-10T01:17:57.783Z",
+      "updatedAt": "2025-07-10T01:17:57.783Z"
+    },
+    {
+      "id": "17521103108063joup",
+      "name": "Snacks y Golosinas",
+      "description": "Productos empacados para picar entre comidas, favoritos de niños y adultos.",
+      "subcategories": [
+        "Papalinas",
+        "Nachos",
+        "Tortrix",
+        "Chocolates",
+        "Chicles",
+        "Caramelos",
+        "Paletas"
+      ],
+      "createdAt": "2025-07-10T01:18:30.806Z",
+      "updatedAt": "2025-07-10T01:18:30.806Z"
+    },
+    {
+      "id": "1752110336557kw7p6",
+      "name": "Conservas y Enlatados",
+      "description": "Alimentos procesados que se conservan por largo tiempo, ideales para emergencias o comidas rápidas.",
+      "subcategories": [
+        "Sardinas",
+        "Atún",
+        "Frijoles enlatados",
+        "Verduras enlatadas",
+        "Salsas de tomate",
+        "Salsas inglesas",
+        "Salsas de soya",
+        "Sopas instantáneas"
+      ],
+      "createdAt": "2025-07-10T01:18:56.557Z",
+      "updatedAt": "2025-07-10T01:18:56.557Z"
+    },
+    {
+      "id": "1752110358498cf9j3",
+      "name": "Carnes Frías y Embutidos",
+      "description": "Productos cárnicos listos para consumir o cocinar, comunes en desayunos o refacciones.",
+      "subcategories": [
+        "Salchichas",
+        "Chorizos",
+        "Jamón",
+        "Mortadela"
+      ],
+      "createdAt": "2025-07-10T01:19:18.498Z",
+      "updatedAt": "2025-07-10T01:19:18.498Z"
+    },
+    {
+      "id": "1752110380288gg9nt",
+      "name": "Huevos y Productos Frescos",
+      "description": "Productos frescos de consumo diario, necesarios en casi todas las recetas guatemaltecas.",
+      "subcategories": [
+        "Huevos",
+        "Plátano",
+        "Tomate",
+        "Cebolla",
+        "Limón"
+      ],
+      "createdAt": "2025-07-10T01:19:40.288Z",
+      "updatedAt": "2025-07-10T01:19:40.288Z"
+    },
+    {
+      "id": "1752110397682s1o33",
+      "name": "Condimentos y Salsas",
+      "description": "Ingredientes que realzan el sabor de las comidas, desde básicos hasta salsas picantes.",
+      "subcategories": [
+        "Aceite de maíz",
+        "Aceite de soya",
+        "Vinagre",
+        "Salsa inglesa",
+        "Salsa soya",
+        "Salsa picante",
+        "Salsa de tomate",
+        "Mostaza",
+        "Mayonesa",
+        "Ketchup"
+      ],
+      "createdAt": "2025-07-10T01:19:57.682Z",
+      "updatedAt": "2025-07-10T01:19:57.682Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "1752109841506l6o4j",
+      "name": "Arroz Gallo dorado",
+      "category": "1752109509681el05f",
+      "subcategory": "Arroz",
+      "buyPrice": 6.75,
+      "sellPrice": 8,
+      "supplier": "Suma",
+      "stock": 50,
+      "image": "https://walmartgt.vtexassets.com/arquivos/ids/828961/26910_02.jpg?v=638854367441500000",
+      "description": "Arroz gallo dorado 2270gramos",
+      "createdAt": "2025-07-10T01:10:41.506Z",
+      "updatedAt": "2025-07-10T01:10:41.506Z"
+    },
+    {
+      "id": "1752109987655k8joh",
+      "name": "Frijol del monte en lata",
+      "category": "1752109509681el05f",
+      "subcategory": "Frijol negro",
+      "buyPrice": 7.85,
+      "sellPrice": 12,
+      "supplier": "Suma",
+      "stock": 50,
+      "image": "https://cropafresh.com/wp-content/uploads/2023/04/frijol-volteado.jpeg",
+      "description": "Frijol del monte en lata 298g",
+      "createdAt": "2025-07-10T01:13:07.655Z",
+      "updatedAt": "2025-07-10T01:13:07.655Z"
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "created": "2025-01-15T00:00:00.000Z",
+    "lastUpdated": "2025-07-10T01:19:57.699Z",
+    "description": "Base de datos del sistema de inventario de abarrotería"
+  }
+}
