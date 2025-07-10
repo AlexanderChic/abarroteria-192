@@ -219,6 +219,7 @@ function loadSubcategories(categoryId) {
 }
 
 // Setup event listeners
+// Setup event listeners
 function setupEventListeners() {
     // Category change listener
     document.getElementById('product-category').addEventListener('change', function() {
@@ -240,6 +241,18 @@ function setupEventListeners() {
     // Price calculation helper
     document.getElementById('product-buy-price').addEventListener('input', calculateMargin);
     document.getElementById('product-sell-price').addEventListener('input', calculateMargin);
+    
+    // Search functionality - AGREGAR ESTO SI NO ESTÁ
+    const searchInput = document.getElementById('search-products');
+    if (searchInput) {
+        searchInput.addEventListener('input', searchProducts);
+        searchInput.addEventListener('keyup', searchProducts);
+    }
+    
+    const filterSelect = document.getElementById('filter-category');
+    if (filterSelect) {
+        filterSelect.addEventListener('change', filterProducts);
+    }
 }
 
 // Calculate profit margin
@@ -716,15 +729,33 @@ async function addServerStatusIndicator() {
 
 // Search products
 function searchProducts() {
-    const searchTerm = document.getElementById('search-products').value.toLowerCase();
+    const searchTerm = document.getElementById('search-products').value.toLowerCase().trim();
     const categoryFilter = document.getElementById('filter-category').value;
     
-// Search products
-function searchProducts() {
-    const searchTerm = document.getElementById('search-products').value.toLowerCase();
-    const categoryFilter = document.getElementById('filter-category').value;
+    console.log('🔍 Searching for:', searchTerm, 'Category:', categoryFilter); // Debug
     
-    const filteredProducts = dataAPI.searchProducts(searchTerm, categoryFilter);
+    let filteredProducts = dataAPI.getProducts();
+    console.log('📦 Total products before filter:', filteredProducts.length); // Debug
+    
+    // Apply search filter
+    if (searchTerm) {
+        filteredProducts = filteredProducts.filter(product => {
+            const nameMatch = product.name.toLowerCase().includes(searchTerm);
+            const descMatch = product.description?.toLowerCase().includes(searchTerm) || false;
+            const supplierMatch = product.supplier?.toLowerCase().includes(searchTerm) || false;
+            const categoryName = dataAPI.getCategoryById(product.category)?.name?.toLowerCase() || '';
+            const categoryMatch = categoryName.includes(searchTerm);
+            
+            return nameMatch || descMatch || supplierMatch || categoryMatch;
+        });
+    }
+    
+    // Apply category filter
+    if (categoryFilter) {
+        filteredProducts = filteredProducts.filter(product => product.category == categoryFilter);
+    }
+    
+    console.log('🎯 Filtered products:', filteredProducts.length); // Debug
     displayFilteredProducts(filteredProducts);
 }
 
@@ -880,4 +911,4 @@ document.addEventListener('keydown', function(e) {
             cancelCategoryEdit();
         }
     }
-})}
+})
