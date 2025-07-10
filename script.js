@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Show server status
         const isServerRunning = await dataAPI.checkServerStatus();
         if (isServerRunning) {
-            console.log('🟢 JSON Server is running on http://localhost:3000');
+            console.log('🟢 JSON Server is running');
         } else {
             console.log('🟡 Working in offline mode');
         }
@@ -90,10 +90,7 @@ function showServerConnectionInfo() {
             <strong>Servidor JSON no conectado</strong>
         </div>
         <div style="margin-bottom: 10px;">
-            Para usar todas las funciones, ejecuta:
-            <div style="background: rgba(0,0,0,0.2); padding: 8px; border-radius: 4px; margin-top: 5px; font-family: monospace; font-size: 12px;">
-                json-server --watch data/db.json --port 3000
-            </div>
+            Para usar todas las funciones, verifica tu conexión.
         </div>
         <div style="font-size: 12px; opacity: 0.9;">
             Trabajando en modo offline con datos por defecto.
@@ -182,6 +179,11 @@ function loadCategoriesDropdown() {
     const categorySelect = document.getElementById('product-category');
     const filterSelect = document.getElementById('filter-category');
     
+    if (!categorySelect || !filterSelect) {
+        console.warn('Category dropdowns not found');
+        return;
+    }
+    
     // Clear existing options
     categorySelect.innerHTML = '<option value="">Seleccionar categoría</option>';
     filterSelect.innerHTML = '<option value="">Todas las categorías</option>';
@@ -198,11 +200,15 @@ function loadCategoriesDropdown() {
         option2.textContent = category.name;
         filterSelect.appendChild(option2);
     });
+    
+    console.log('✅ Categories loaded in dropdowns:', categories.length);
 }
 
 // Load subcategories based on selected category
 function loadSubcategories(categoryId) {
     const subcategorySelect = document.getElementById('product-subcategory');
+    if (!subcategorySelect) return;
+    
     subcategorySelect.innerHTML = '<option value="">Seleccionar subcategoría</option>';
     
     if (categoryId) {
@@ -219,40 +225,111 @@ function loadSubcategories(categoryId) {
 }
 
 // Setup event listeners
-// Setup event listeners
 function setupEventListeners() {
     // Category change listener
-    document.getElementById('product-category').addEventListener('change', function() {
-        loadSubcategories(this.value);
-    });
+    const productCategorySelect = document.getElementById('product-category');
+    if (productCategorySelect) {
+        productCategorySelect.addEventListener('change', function() {
+            loadSubcategories(this.value);
+        });
+    }
 
     // Product form submission
-    document.getElementById('product-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveProduct();
-    });
+    const productForm = document.getElementById('product-form');
+    if (productForm) {
+        productForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveProduct();
+        });
+    }
 
     // Category form submission
-    document.getElementById('category-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveCategory();
-    });
+    const categoryForm = document.getElementById('category-form');
+    if (categoryForm) {
+        categoryForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveCategory();
+        });
+    }
 
     // Price calculation helper
-    document.getElementById('product-buy-price').addEventListener('input', calculateMargin);
-    document.getElementById('product-sell-price').addEventListener('input', calculateMargin);
+    const buyPriceInput = document.getElementById('product-buy-price');
+    const sellPriceInput = document.getElementById('product-sell-price');
+    if (buyPriceInput) buyPriceInput.addEventListener('input', calculateMargin);
+    if (sellPriceInput) sellPriceInput.addEventListener('input', calculateMargin);
     
-    // Search functionality - AGREGAR ESTO SI NO ESTÁ
+    // BÚSQUEDA Y FILTROS - MUY IMPORTANTE
     const searchInput = document.getElementById('search-products');
     if (searchInput) {
-        searchInput.addEventListener('input', searchProducts);
-        searchInput.addEventListener('keyup', searchProducts);
+        console.log('✅ Search input found, adding listeners');
+        // Múltiples eventos para asegurar que funcione
+        searchInput.addEventListener('input', performSearch);
+        searchInput.addEventListener('keyup', performSearch);
+        searchInput.addEventListener('change', performSearch);
+    } else {
+        console.warn('❌ Search input not found');
     }
     
     const filterSelect = document.getElementById('filter-category');
     if (filterSelect) {
-        filterSelect.addEventListener('change', filterProducts);
+        console.log('✅ Filter select found, adding listeners');
+        filterSelect.addEventListener('change', performSearch);
+    } else {
+        console.warn('❌ Filter select not found');
     }
+}
+
+// Función unificada de búsqueda y filtrado
+function performSearch() {
+    console.log('🔍 Performing search...');
+    
+    const searchInput = document.getElementById('search-products');
+    const filterSelect = document.getElementById('filter-category');
+    
+    const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+    const categoryFilter = filterSelect ? filterSelect.value : '';
+    
+    console.log('Search term:', searchTerm, 'Category filter:', categoryFilter);
+    
+    let allProducts = dataAPI.getProducts();
+    console.log('Total products:', allProducts.length);
+    
+    let filteredProducts = [...allProducts];
+    
+    // Aplicar filtro de búsqueda por texto
+    if (searchTerm) {
+        filteredProducts = filteredProducts.filter(product => {
+            const nameMatch = product.name.toLowerCase().includes(searchTerm);
+            const descMatch = (product.description || '').toLowerCase().includes(searchTerm);
+            const supplierMatch = (product.supplier || '').toLowerCase().includes(searchTerm);
+            
+            // Buscar también en nombre de categoría
+            const category = dataAPI.getCategoryById(product.category);
+            const categoryMatch = category ? category.name.toLowerCase().includes(searchTerm) : false;
+            
+            // Buscar en subcategoría
+            const subcategoryMatch = (product.subcategory || '').toLowerCase().includes(searchTerm);
+            
+            return nameMatch || descMatch || supplierMatch || categoryMatch || subcategoryMatch;
+        });
+    }
+    
+    // Aplicar filtro de categoría
+    if (categoryFilter) {
+        filteredProducts = filteredProducts.filter(product => product.category == categoryFilter);
+    }
+    
+    console.log('Filtered products:', filteredProducts.length);
+    displayFilteredProducts(filteredProducts);
+}
+
+// Mantener funciones individuales para compatibilidad
+function searchProducts() {
+    performSearch();
+}
+
+function filterProducts() {
+    performSearch();
 }
 
 // Calculate profit margin
@@ -361,8 +438,14 @@ function saveCategory() {
 
 // Reset product form
 function resetProductForm() {
-    document.getElementById('product-form').reset();
-    document.getElementById('product-subcategory').innerHTML = '<option value="">Seleccionar subcategoría</option>';
+    const form = document.getElementById('product-form');
+    if (form) form.reset();
+    
+    const subcategorySelect = document.getElementById('product-subcategory');
+    if (subcategorySelect) {
+        subcategorySelect.innerHTML = '<option value="">Seleccionar subcategoría</option>';
+    }
+    
     document.getElementById('product-form-title').textContent = '➕ Agregar Producto';
     document.getElementById('save-product-btn').textContent = '💾 Guardar Producto';
     document.getElementById('cancel-edit-btn').style.display = 'none';
@@ -372,7 +455,9 @@ function resetProductForm() {
 
 // Reset category form
 function resetCategoryForm() {
-    document.getElementById('category-form').reset();
+    const form = document.getElementById('category-form');
+    if (form) form.reset();
+    
     document.getElementById('category-form-title').textContent = '➕ Agregar Categoría';
     document.getElementById('save-category-btn').textContent = '💾 Guardar Categoría';
     document.getElementById('cancel-category-edit-btn').style.display = 'none';
@@ -394,6 +479,8 @@ function cancelCategoryEdit() {
 // Load products view
 function loadProductsView() {
     const grid = document.getElementById('products-grid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
 
     const products = dataAPI.getProducts();
@@ -414,6 +501,8 @@ function loadProductsView() {
 // Display filtered products
 function displayFilteredProducts(filteredProducts) {
     const grid = document.getElementById('products-grid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
 
     if (filteredProducts.length === 0) {
@@ -426,6 +515,8 @@ function displayFilteredProducts(filteredProducts) {
         const card = createProductCard(product, categoryName);
         grid.appendChild(card);
     });
+    
+    console.log('✅ Displayed products:', filteredProducts.length);
 }
 
 // Create product card
@@ -514,6 +605,8 @@ function deleteProduct(id) {
 // Load categories view
 function loadCategoriesView() {
     const grid = document.getElementById('categories-grid');
+    if (!grid) return;
+    
     grid.innerHTML = '';
 
     const categories = dataAPI.getCategories();
@@ -609,7 +702,6 @@ async function updateDashboard() {
         }
         
         const stats = dataAPI.getStatistics();
-        console.log('📊 Stats:', stats);
         
         // Update stats with error handling
         const totalProductsEl = document.getElementById('total-products');
@@ -617,40 +709,21 @@ async function updateDashboard() {
         const totalValueEl = document.getElementById('total-value');
         const lowStockEl = document.getElementById('low-stock');
         
-        console.log('🔍 Elements found:', {
-            totalProductsEl: !!totalProductsEl,
-            totalCategoriesEl: !!totalCategoriesEl,
-            totalValueEl: !!totalValueEl,
-            lowStockEl: !!lowStockEl
-        });
-        
         if (totalProductsEl) {
             totalProductsEl.textContent = stats.totalProducts;
-            console.log('✅ Updated total products:', stats.totalProducts);
-        } else {
-            console.error('❌ Element total-products not found');
         }
         
         if (totalCategoriesEl) {
             totalCategoriesEl.textContent = stats.totalCategories;
-            console.log('✅ Updated total categories:', stats.totalCategories);
-        } else {
-            console.error('❌ Element total-categories not found');
         }
         
         if (totalValueEl) {
             const formattedValue = `Q${stats.totalValue.toLocaleString('es-GT', { minimumFractionDigits: 2 })}`;
             totalValueEl.textContent = formattedValue;
-            console.log('✅ Updated total value:', formattedValue);
-        } else {
-            console.error('❌ Element total-value not found');
         }
         
         if (lowStockEl) {
             lowStockEl.textContent = stats.lowStock;
-            console.log('✅ Updated low stock:', stats.lowStock);
-        } else {
-            console.error('❌ Element low-stock not found');
         }
         
         // Add server status indicator
@@ -665,7 +738,6 @@ async function updateDashboard() {
             
             if (recentProducts.length === 0) {
                 recentGrid.innerHTML = '<div class="empty-state"><h3>📦 No hay productos recientes</h3><p>Agrega algunos productos para verlos aquí</p></div>';
-                console.log('📦 No recent products to display');
                 return;
             }
             
@@ -678,21 +750,12 @@ async function updateDashboard() {
                     console.error('Error creating product card:', error);
                 }
             });
-            
-            console.log('✅ Recent products displayed:', recentProducts.length);
-        } else {
-            console.error('❌ Element recent-products-grid not found');
         }
         
         console.log('✅ Dashboard updated successfully');
         
     } catch (error) {
         console.error('❌ Error updating dashboard:', error);
-        // Show fallback content
-        const recentGrid = document.getElementById('recent-products-grid');
-        if (recentGrid) {
-            recentGrid.innerHTML = '<div class="empty-state"><h3>⚠️ Error cargando datos</h3><p>Intenta recargar la página</p></div>';
-        }
     }
 }
 
@@ -718,7 +781,7 @@ async function addServerStatusIndicator() {
     
     if (isServerRunning) {
         statusDiv.style.background = 'rgba(46, 125, 50, 0.3)';
-        statusDiv.innerHTML = '🟢 Conectado a JSON Server';
+        statusDiv.innerHTML = '🟢 Conectado al Servidor';
     } else {
         statusDiv.style.background = 'rgba(255, 152, 0, 0.3)';
         statusDiv.innerHTML = '🟡 Modo Offline';
@@ -727,58 +790,25 @@ async function addServerStatusIndicator() {
     header.appendChild(statusDiv);
 }
 
-// Search products
-function searchProducts() {
-    const searchTerm = document.getElementById('search-products').value.toLowerCase().trim();
-    const categoryFilter = document.getElementById('filter-category').value;
-    
-    console.log('🔍 Searching for:', searchTerm, 'Category:', categoryFilter); // Debug
-    
-    let filteredProducts = dataAPI.getProducts();
-    console.log('📦 Total products before filter:', filteredProducts.length); // Debug
-    
-    // Apply search filter
-    if (searchTerm) {
-        filteredProducts = filteredProducts.filter(product => {
-            const nameMatch = product.name.toLowerCase().includes(searchTerm);
-            const descMatch = product.description?.toLowerCase().includes(searchTerm) || false;
-            const supplierMatch = product.supplier?.toLowerCase().includes(searchTerm) || false;
-            const categoryName = dataAPI.getCategoryById(product.category)?.name?.toLowerCase() || '';
-            const categoryMatch = categoryName.includes(searchTerm);
-            
-            return nameMatch || descMatch || supplierMatch || categoryMatch;
-        });
-    }
-    
-    // Apply category filter
-    if (categoryFilter) {
-        filteredProducts = filteredProducts.filter(product => product.category == categoryFilter);
-    }
-    
-    console.log('🎯 Filtered products:', filteredProducts.length); // Debug
-    displayFilteredProducts(filteredProducts);
-}
-
-// Filter products by category
-function filterProducts() {
-    searchProducts(); // Use the same function for consistency
-}
-
 // Show message
 function showMessage(containerId, message, type) {
     const container = document.getElementById(containerId);
-    container.innerHTML = `<div class="message ${type}">${message}</div>`;
-    
-    // Clear message after 5 seconds
-    setTimeout(() => {
-        clearMessage(containerId);
-    }, 5000);
+    if (container) {
+        container.innerHTML = `<div class="message ${type}">${message}</div>`;
+        
+        // Clear message after 5 seconds
+        setTimeout(() => {
+            clearMessage(containerId);
+        }, 5000);
+    }
 }
 
 // Clear message
 function clearMessage(containerId) {
     const container = document.getElementById(containerId);
-    container.innerHTML = '';
+    if (container) {
+        container.innerHTML = '';
+    }
 }
 
 // Export data to JSON
@@ -911,4 +941,28 @@ document.addEventListener('keydown', function(e) {
             cancelCategoryEdit();
         }
     }
-})
+});
+
+// Initialize search functionality when products view loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Additional setup for search functionality
+    setTimeout(() => {
+        const searchInput = document.getElementById('search-products');
+        const filterSelect = document.getElementById('filter-category');
+        
+        if (searchInput) {
+            // Clear any previous listeners and add new ones
+            searchInput.removeEventListener('input', performSearch);
+            searchInput.removeEventListener('keyup', performSearch);
+            searchInput.addEventListener('input', performSearch);
+            searchInput.addEventListener('keyup', performSearch);
+            console.log('🔍 Search functionality initialized');
+        }
+        
+        if (filterSelect) {
+            filterSelect.removeEventListener('change', performSearch);
+            filterSelect.addEventListener('change', performSearch);
+            console.log('🔽 Filter functionality initialized');
+        }
+    }, 1000);
+});
