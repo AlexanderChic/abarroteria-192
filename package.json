@@ -2,9 +2,10 @@
   "name": "abarroteria-api",
   "version": "1.0.0",
   "description": "API para sistema de abarrotería",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "json-server --watch data/db.json --port ${PORT:-3000} --host 0.0.0.0 --no-cors"
+    "start": "node server.js",
+    "dev": "json-server --watch data/db.json --port 3000"
   },
   "dependencies": {
     "json-server": "^0.17.4"
