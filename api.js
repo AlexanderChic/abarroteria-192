@@ -12,8 +12,8 @@ class DataAPI {
         };
         this.isInitialized = false;
         
-        // JSON Server endpoints
-        this.baseURL = 'http://localhost:3000';
+        // JSON Server endpoints - Railway URL
+        this.baseURL = 'https://abarroteria-crud-production.up.railway.app';
         this.endpoints = {
             categories: `${this.baseURL}/categories`,
             products: `${this.baseURL}/products`,
