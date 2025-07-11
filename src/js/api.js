@@ -321,7 +321,7 @@ class DataAPI {
             {
                 id: "3",
                 username: "pedidos",
-                password: "pedidos123",
+                password: "pedidos12345",
                 type: "client",
                 name: "Usuario Pedidos",
                 email: "pedidos@email.com",
