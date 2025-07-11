@@ -776,6 +776,52 @@ function sortProducts() {
         window.guestManager.sortProducts();
     }
 }
+// Agrega estas funciones globales al final de tu guest.js
+
+// Funciones globales para el ticket modal
+function closeTicketModal() {
+    if (window.guestManager) {
+        window.guestManager.closeTicketModal();
+    }
+}
+
+function downloadTicket() {
+    if (window.guestManager) {
+        window.guestManager.downloadTicket();
+    }
+}
+
+// Actualiza el event listener para cerrar modales
+document.addEventListener('DOMContentLoaded', () => {
+    window.guestManager = new GuestManager();
+    
+    // Load cart from storage
+    window.guestManager.loadCartFromStorage();
+    
+    // Close modals when clicking outside
+    window.addEventListener('click', (event) => {
+        const productModal = document.getElementById('product-modal');
+        const confirmationModal = document.getElementById('order-confirmation-modal');
+        
+        if (event.target === productModal) {
+            closeProductModal();
+        }
+        
+        if (event.target === confirmationModal) {
+            closeTicketModal();
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            const confirmationModal = document.getElementById('order-confirmation-modal');
+            if (confirmationModal.style.display === 'block') {
+                closeTicketModal();
+            }
+        }
+    });
+});
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
