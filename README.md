@@ -169,6 +169,26 @@ Este proyecto es de código abierto y libre para uso personal y comercial.
 **Desarrollado con ❤️ para pequeños negocios**
 
 ¿Te gustó el proyecto? ⭐ Dale una estrella en GitHub
+
+
+TIENDAFINAL - BAR/
+├── login.html              # 🚪 Punto de entrada
+├── src/
+│   ├── css/
+│   │   ├── login.css       # 🎨 Estilos del login
+│   │   └── styles.css      # 🎨 Estilos principales
+│   ├── js/
+│   │   ├── api.js          # 🔄 API actualizada (localhost)
+│   │   ├── auth.js         # 🔐 Autenticación compartida
+│   │   ├── login.js        # 🚪 Lógica del login
+│   │   └── script.js       # ⚙️ Tu script original
+│   └── data/
+│       └── db.json         # 💾 Base de datos con usuarios
+└── public/
+    ├── admin.html          # 👨‍💼 Vista administrador
+    └── client.html         # 👤 Vista cliente
 =======
 # abarroteria-crud
 >>>>>>> b3f9e7b0d1ab3a396891c56fd942251a511a9efe
+
+

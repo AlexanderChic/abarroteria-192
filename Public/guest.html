@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abarrotería - Catálogo</title>
+    <link rel="stylesheet" href="../src/css/styles.css">
+    <link rel="stylesheet" href="../src/css/guest.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🏪 Abarrotería Jardines del edén</h1>
+                    <p>Catálogo de Productos - Invitado</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <span id="user-name">Invitado</span>
+                        <button class="logout-btn" onclick="logout()">🚪 Salir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <button class="nav-btn active" onclick="showView('catalog')">🛍️ Catálogo</button>
+            <button class="nav-btn" onclick="showView('cart')">🛒 Carrito <span id="cart-count">0</span></button>
+            <button class="nav-btn" onclick="showView('checkout')" id="checkout-nav" style="display: none;">📋 Finalizar Pedido</button>
+        </div>
+
+        <!-- Catalog View -->
+        <div id="catalog" class="view active">
+            <h2>🛍️ Catálogo de Productos</h2>
+            <div class="filters">
+                <div class="form-group">
+                    <input type="text" id="search-products" placeholder="Buscar productos..." onkeyup="searchProducts()">
+                </div>
+                <div class="form-group">
+                    <select id="filter-category" onchange="filterProducts()">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="sort-products" onchange="sortProducts()">
+                        <option value="name">Ordenar por nombre</option>
+                        <option value="price-low">Precio: menor a mayor</option>
+                        <option value="price-high">Precio: mayor a menor</option>
+                    </select>
+                </div>
+            </div>
+            <div id="products-grid" class="cards-grid guest-grid"></div>
+        </div>
+
+        <!-- Cart View -->
+        <div id="cart" class="view">
+            <h2>🛒 Carrito de Compras</h2>
+            <div id="cart-content">
+                <div id="cart-items"></div>
+                <div id="cart-summary" style="display: none;">
+                    <div class="cart-total">
+                        <h3>Total: Q<span id="total-amount">0.00</span></h3>
+                        <p class="payment-info">💰 <strong>Pago contra entrega</strong></p>
+                        <div class="cart-actions">
+                            <button class="btn btn-secondary" onclick="clearCart()">🗑️ Vaciar Carrito</button>
+                            <button class="btn btn-success" onclick="proceedToCheckout()" id="proceed-btn">📋 Proceder al Pedido</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="empty-cart" class="empty-state">
+                    <h3>🛒 Tu carrito está vacío</h3>
+                    <p>Agrega algunos productos para comenzar</p>
+                    <button class="btn" onclick="showView('catalog')">🛍️ Ir al Catálogo</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkout View -->
+        <div id="checkout" class="view">
+            <h2>📋 Finalizar Pedido</h2>
+            <div class="checkout-container">
+                <div class="checkout-left">
+                    <h3>Información de Entrega</h3>
+                    <form id="checkout-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="customer-name">Nombre *</label>
+                                <input type="text" id="customer-name" required placeholder="Tu nombre">
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-lastname">Apellido *</label>
+                                <input type="text" id="customer-lastname" required placeholder="Tu apellido">
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-phone">Teléfono *</label>
+                                <input type="tel" id="customer-phone" required placeholder="Tu número de teléfono">
+                            </div>
+                        </div>
+                        
+                        <h4>Dirección de Entrega</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="delivery-cluster">Cluster *</label>
+                                <select id="delivery-cluster" required>
+                                    <option value="">Seleccionar cluster</option>
+                                    <option value="Cluster 1">Cluster 1</option>
+                                    <option value="Cluster 2">Cluster 2</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="delivery-colony">Colonia</label>
+                                <input type="text" id="delivery-colony" value="Jardines del Edén" readonly>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="delivery-address">Casa/Dirección específica *</label>
+                                <textarea id="delivery-address" required placeholder="Ej: Casa #123, Calle Principal, Referencias adicionales..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="order-notes">Notas adicionales (opcional)</label>
+                            <textarea id="order-notes" placeholder="Instrucciones especiales, referencias, etc."></textarea>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="checkout-right">
+                    <h3>Resumen del Pedido</h3>
+                    <div id="order-summary"></div>
+                    <div class="payment-method">
+                        <h4>💰 Método de Pago</h4>
+                        <div class="payment-info-box">
+                            <p><strong>Pago contra entrega</strong></p>
+                            <p>Pagarás en efectivo cuando recibas tu pedido</p>
+                        </div>
+                    </div>
+                    <div class="checkout-actions">
+                        <button class="btn btn-secondary" onclick="showView('cart')">← Volver al Carrito</button>
+                        <button class="btn btn-success" onclick="completeOrder()" id="complete-order-btn">✅ Completar Pedido</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Confirmation Modal -->
+        <div id="order-confirmation-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>✅ Pedido Confirmado</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="confirmation-content">
+                        <div class="success-icon">🎉</div>
+                        <h4>¡Tu pedido ha sido enviado!</h4>
+                        <p>Número de pedido: <strong id="order-number"></strong></p>
+                        <p>Recibirás tu pedido en la dirección especificada.</p>
+                        <p><strong>Pago contra entrega</strong></p>
+                        <div class="order-details" id="order-details"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" onclick="startNewOrder()">🛍️ Hacer Nuevo Pedido</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="product-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-product-name">Producto</h3>
+                <span class="close" onclick="closeProductModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="product-modal-grid">
+                    <div class="product-image">
+                        <img id="modal-product-image" src="https://images.unsplash.com/photo-1586380951230-d3be9b34b8f5?w=300&h=300&fit=crop" alt="Producto">
+                    </div>
+                    <div class="product-details">
+                        <p><strong>Precio: Q</strong> $<span id="modal-product-price"></span></p>
+                        <p><strong>Disponible:</strong> <span id="modal-product-stock"></span> unidades</p>
+                        <p><strong>Descripción:</strong></p>
+                        <p id="modal-product-description"></p>
+                        
+                        <div class="quantity-selector">
+                            <label for="modal-quantity">Cantidad:</label>
+                            <div class="quantity-controls">
+                                <button type="button" onclick="changeQuantity(-1)">-</button>
+                                <input type="number" id="modal-quantity" value="1" min="1" max="1">
+                                <button type="button" onclick="changeQuantity(1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
+                <button class="btn btn-success" onclick="addToCartFromModal()" id="add-to-cart-btn">🛒 Agregar al Carrito</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../src/js/api.js"></script>
+    <script src="../src/js/auth.js"></script>
+    <script src="../src/js/guest.js"></script>
+</body>
+</html>

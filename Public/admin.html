@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abarrotería - Panel de Administración</title>
+    <link rel="stylesheet" href="../src/css/styles.css">
+    <link rel="stylesheet" href="../src/css/admin-orders.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1>🏪 Abarrotería Jardines del edén</h1>
+                    <p>Panel de Administración</p>
+                </div>
+                <div class="header-right">
+                    <div class="user-info">
+                        <span id="user-name">Administrador</span>
+                        <button class="logout-btn" onclick="logout()">🚪 Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav">
+            <button class="nav-btn active" onclick="showView('dashboard')">📊 Dashboard</button>
+            <button class="nav-btn" onclick="showView('orders')">📋 Pedidos</button>
+            <button class="nav-btn" onclick="showView('products')">📦 Productos</button>
+            <button class="nav-btn" onclick="showView('add-product')">➕ Agregar Producto</button>
+            <button class="nav-btn" onclick="showView('categories')">📂 Categorías</button>
+            <button class="nav-btn" onclick="showView('add-category')">➕ Agregar Categoría</button>
+        </div>
+
+        <!-- Dashboard View -->
+        <div id="dashboard" class="view active">
+            <h2>📊 Dashboard</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <h3 id="total-products">0</h3>
+                    <p>Total Productos</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="total-categories">0</h3>
+                    <p>Total Categorías</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="total-value">$0</h3>
+                    <p>Valor Total Inventario</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="pending-orders">0</h3>
+                    <p>Pedidos Pendientes</p>
+                </div>
+            </div>
+            <div id="recent-products">
+                <h3>Productos Recientes</h3>
+                <div id="recent-products-grid" class="cards-grid"></div>
+            </div>
+        </div>
+
+        <!-- Orders View -->
+        <div id="orders" class="view">
+            <div class="orders-header">
+                <h2>📋 Gestión de Pedidos</h2>
+                <button class="btn btn-primary" onclick="showAllOrders()" id="show-all-orders-btn">
+                    📋 Ver Todos los Pedidos
+                </button>
+            </div>
+            
+            <div class="orders-filters">
+                <div class="form-group">
+                    <select id="filter-order-status" onchange="filterOrders()">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente">Pendientes</option>
+                        <option value="enviado">Enviados</option>
+                        <option value="entregado">Entregados</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <input type="date" id="filter-order-date" onchange="filterOrders()">
+                </div>
+                <div class="form-group">
+                    <input type="text" id="search-orders" placeholder="Buscar por cliente..." onkeyup="searchOrders()">
+                </div>
+                <button class="btn btn-secondary" onclick="refreshOrders()">🔄 Actualizar</button>
+            </div>
+            
+            <div class="orders-stats">
+                <div class="stat-card small">
+                    <h4 id="total-orders">0</h4>
+                    <p>Total Pedidos</p>
+                </div>
+                <div class="stat-card small">
+                    <h4 id="pending-orders-count">0</h4>
+                    <p>Pendientes</p>
+                </div>
+                <div class="stat-card small">
+                    <h4 id="sent-orders-count">0</h4>
+                    <p>Enviados</p>
+                </div>
+                <div class="stat-card small">
+                    <h4 id="delivered-orders-count">0</h4>
+                    <p>Entregados</p>
+                </div>
+            </div>
+            
+            <div id="orders-grid" class="orders-grid"></div>
+            
+            <div id="no-orders" class="empty-state" style="display: none;">
+                <h3>📋 No hay pedidos</h3>
+                <p>Los pedidos aparecerán aquí cuando los clientes realicen compras</p>
+            </div>
+        </div>
+
+        <!-- Products View -->
+        <div id="products" class="view">
+            <h2>📦 Gestión de Productos</h2>
+            <div class="filters">
+                <div class="form-group">
+                    <input type="text" id="search-products" placeholder="Buscar productos..." onkeyup="searchProducts()">
+                </div>
+                <div class="form-group">
+                    <select id="filter-category" onchange="filterProducts()">
+                        <option value="">Todas las categorías</option>
+                    </select>
+                </div>
+            </div>
+            <div id="products-grid" class="cards-grid"></div>
+        </div>
+
+        <!-- Add Product View -->
+        <div id="add-product" class="view">
+            <h2 id="product-form-title">➕ Agregar Producto</h2>
+            <div id="product-message"></div>
+            <form id="product-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="product-name">Nombre del Producto *</label>
+                        <input type="text" id="product-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-category">Categoría *</label>
+                        <select id="product-category" required>
+                            <option value="">Seleccionar categoría</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-subcategory">Subcategoría</label>
+                        <select id="product-subcategory">
+                            <option value="">Seleccionar subcategoría</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-buy-price">Precio de Compra *</label>
+                        <input type="number" id="product-buy-price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-sell-price">Precio de Venta *</label>
+                        <input type="number" id="product-sell-price" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-supplier">Proveedor *</label>
+                        <select id="product-supplier" required>
+                            <option value="">Seleccionar proveedor</option>
+                            <option value="Suma">Suma</option>
+                            <option value="Maxi Despensa">Maxi Despensa</option>
+                            <option value="Depositos">Depositos</option>
+                            <option value="Walmart">Walmart</option>
+                            <option value="Frutas">Frutas</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="product-stock">Stock Actual</label>
+                        <input type="number" id="product-stock" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="product-image">Imagen (URL)</label>
+                        <input type="url" id="product-image" placeholder="https://ejemplo.com/imagen.jpg">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="product-description">Descripción</label>
+                    <textarea id="product-description" placeholder="Descripción del producto..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success" id="save-product-btn">💾 Guardar Producto</button>
+                    <button type="button" class="btn" onclick="resetProductForm()">🔄 Limpiar</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-edit-btn" onclick="cancelEdit()" style="display: none;">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Categories View -->
+        <div id="categories" class="view">
+            <h2>📂 Gestión de Categorías</h2>
+            <div id="categories-grid" class="cards-grid"></div>
+        </div>
+
+        <!-- Add Category View -->
+        <div id="add-category" class="view">
+            <h2 id="category-form-title">➕ Agregar Categoría</h2>
+            <div id="category-message"></div>
+            <form id="category-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="category-name">Nombre de la Categoría *</label>
+                        <input type="text" id="category-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category-description">Descripción</label>
+                        <textarea id="category-description" placeholder="Descripción de la categoría..."></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="category-subcategories">Subcategorías (separadas por comas)</label>
+                    <input type="text" id="category-subcategories" placeholder="Subcategoría 1, Subcategoría 2, ...">
+                    <small class="help-text">Ejemplo: Cereales, Enlatados, Condimentos</small>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success" id="save-category-btn">💾 Guardar Categoría</button>
+                    <button type="button" class="btn" onclick="resetCategoryForm()">🔄 Limpiar</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-category-edit-btn" onclick="cancelCategoryEdit()" style="display: none;">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="order-details-modal" class="modal" style="display: none;">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>📋 Detalles del Pedido</h3>
+                <span class="close" onclick="closeOrderModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="order-details-content"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeOrderModal()">Cerrar</button>
+                <button class="btn btn-warning" onclick="markAsDelivered()" id="mark-delivered-btn">✅ Marcar como Entregado</button>
+                <button class="btn btn-success" onclick="markAsSent()" id="mark-sent-btn">🚚 Marcar como Enviado</button>
+                <button class="btn btn-danger" onclick="deleteOrder()" id="delete-order-btn">🗑️ Eliminar Pedido</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Orders Modal -->
+    <div id="all-orders-modal" class="modal" style="display: none;">
+        <div class="modal-content extra-large">
+            <div class="modal-header">
+                <h3>📋 Todos los Pedidos</h3>
+                <span class="close" onclick="closeAllOrdersModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="all-orders-filters">
+                    <div class="form-group">
+                        <select id="modal-filter-status" onchange="filterAllOrdersModal()">
+                            <option value="">Todos los estados</option>
+                            <option value="pendiente">Pendientes</option>
+                            <option value="enviado">Enviados</option>
+                            <option value="entregado">Entregados</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="modal-search-orders" placeholder="Buscar..." onkeyup="filterAllOrdersModal()">
+                    </div>
+                </div>
+                <div id="all-orders-table"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeAllOrdersModal()">Cerrar</button>
+                <button class="btn btn-primary" onclick="exportOrders()">📄 Exportar a CSV</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../src/js/api.js"></script>
+    <script src="../src/js/auth.js"></script>
+    <script src="../src/js/script.js"></script>
+    <script src="../src/js/admin-orders.js"></script>
+</body>
+</html>

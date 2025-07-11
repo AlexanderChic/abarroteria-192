@@ -4,6 +4,7 @@ class DataAPI {
         this.data = {
             categories: [],
             products: [],
+            users: [],
             metadata: {
                 version: '1.0',
                 lastUpdated: new Date().toISOString(),
@@ -11,14 +12,182 @@ class DataAPI {
             }
         };
         this.isInitialized = false;
+        this.currentUser = null;
         
-        // JSON Server endpoints - Railway URL
-        this.baseURL = 'https://abarroteria-crud-production.up.railway.app';
+        // JSON Server endpoints - LOCAL
+        this.baseURL = 'http://localhost:3000';
         this.endpoints = {
             categories: `${this.baseURL}/categories`,
             products: `${this.baseURL}/products`,
+            users: `${this.baseURL}/users`,
             metadata: `${this.baseURL}/metadata`
         };
+    }
+
+    // ========== AUTHENTICATION METHODS ==========
+
+    // Login user
+    async login(username, password, userType) {
+        try {
+            const response = await fetch(this.endpoints.users);
+            if (!response.ok) {
+                throw new Error('Failed to fetch users');
+            }
+            
+            const users = await response.json();
+            const user = users.find(u => 
+                u.username === username && 
+                u.password === password && 
+                u.type === userType
+            );
+            
+            if (user) {
+                this.currentUser = { ...user };
+                delete this.currentUser.password; // Remove password from memory
+                sessionStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                console.log('✅ Login successful:', this.currentUser.username);
+                return this.currentUser;
+            } else {
+                throw new Error('Invalid credentials');
+            }
+        } catch (error) {
+            console.error('❌ Login failed:', error.message);
+            throw error;
+        }
+    }
+
+    // Logout user
+    logout() {
+        this.currentUser = null;
+        sessionStorage.removeItem('currentUser');
+        console.log('👋 User logged out');
+    }
+
+    // Check if user is authenticated
+    isAuthenticated() {
+        if (this.currentUser) return true;
+        
+        // Check session storage
+        const savedUser = sessionStorage.getItem('currentUser');
+        if (savedUser) {
+            this.currentUser = JSON.parse(savedUser);
+            return true;
+        }
+        
+        return false;
+    }
+
+    // Get current user
+    getCurrentUser() {
+        return this.currentUser;
+    }
+
+    // Check if current user is admin
+    isAdmin() {
+        return this.currentUser && this.currentUser.type === 'admin';
+    }
+
+    // Check if current user is client
+    isClient() {
+        return this.currentUser && this.currentUser.type === 'client';
+    }
+
+    // Check if current user is guest
+    isGuest() {
+        return this.currentUser && this.currentUser.type === 'guest';
+    }
+
+    // ========== ORDERS METHODS ==========
+
+    // Get all orders (admin only)
+    async getOrders() {
+        try {
+            const response = await fetch(`${this.baseURL}/orders`);
+            if (response.ok) {
+                return await response.json();
+            }
+            return [];
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            return [];
+        }
+    }
+
+    // Create new order
+    async createOrder(orderData) {
+        const newOrder = {
+            id: this.generateId(),
+            ...orderData,
+            status: 'pendiente',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+        
+        try {
+            const response = await fetch(`${this.baseURL}/orders`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newOrder)
+            });
+
+            if (response.ok) {
+                const savedOrder = await response.json();
+                console.log('➕ Order created:', savedOrder.id);
+                return savedOrder;
+            } else {
+                throw new Error('Failed to save order to server');
+            }
+        } catch (error) {
+            console.error('Error creating order:', error);
+            throw error;
+        }
+    }
+
+    // Update order status
+    async updateOrderStatus(orderId, status) {
+        try {
+            const response = await fetch(`${this.baseURL}/orders/${orderId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    status: status,
+                    updatedAt: new Date().toISOString()
+                })
+            });
+
+            if (response.ok) {
+                console.log('✏️ Order status updated:', orderId, status);
+                return await response.json();
+            } else {
+                throw new Error('Failed to update order status');
+            }
+        } catch (error) {
+            console.error('Error updating order status:', error);
+            throw error;
+        }
+    }
+
+    // Delete order
+    async deleteOrder(orderId) {
+        try {
+            const response = await fetch(`${this.baseURL}/orders/${orderId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                console.log('🗑️ Order deleted:', orderId);
+                return true;
+            } else {
+                throw new Error('Failed to delete order');
+            }
+        } catch (error) {
+            console.error('Error deleting order:', error);
+            throw error;
+        }
     }
 
     // Initialize data - load from JSON Server
@@ -41,9 +210,10 @@ class DataAPI {
     // Load data from JSON Server
     async loadFromServer() {
         try {
-            const [categoriesResponse, productsResponse, metadataResponse] = await Promise.all([
+            const [categoriesResponse, productsResponse, usersResponse, metadataResponse] = await Promise.all([
                 fetch(this.endpoints.categories),
                 fetch(this.endpoints.products),
+                fetch(this.endpoints.users),
                 fetch(this.endpoints.metadata)
             ]);
 
@@ -53,6 +223,11 @@ class DataAPI {
 
             this.data.categories = await categoriesResponse.json();
             this.data.products = await productsResponse.json();
+            
+            // Users might not exist initially
+            if (usersResponse.ok) {
+                this.data.users = await usersResponse.json();
+            }
             
             // Metadata might not exist initially
             if (metadataResponse.ok) {
@@ -70,6 +245,7 @@ class DataAPI {
         this.data = {
             categories: this.getDefaultCategories(),
             products: [],
+            users: this.getDefaultUsers(),
             metadata: {
                 version: '1.0',
                 lastUpdated: new Date().toISOString(),
@@ -77,6 +253,30 @@ class DataAPI {
             }
         };
         console.log('🔧 Initialized with default database');
+    }
+
+    // Get default users
+    getDefaultUsers() {
+        return [
+            {
+                id: "1",
+                username: "admin",
+                password: "admin123",
+                type: "admin",
+                name: "Administrador",
+                email: "admin@abarroteria.com",
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: "2",
+                username: "cliente",
+                password: "cliente123",
+                type: "client",
+                name: "Cliente Demo",
+                email: "cliente@email.com",
+                createdAt: new Date().toISOString()
+            }
+        ];
     }
 
     // Update metadata on server
@@ -447,6 +647,7 @@ class DataAPI {
         this.data = {
             categories: newData.categories,
             products: newData.products,
+            users: newData.users || this.getDefaultUsers(),
             metadata: newData.metadata || {
                 version: '1.0',
                 lastUpdated: new Date().toISOString(),
@@ -456,18 +657,6 @@ class DataAPI {
         
         console.log('📥 Database updated successfully');
         return true;
-    }
-
-    // ========== EXPORT/IMPORT METHODS ==========
-
-    // Export all data (for backup)
-    exportData() {
-        return this.getDatabase();
-    }
-
-    // Import data (for restore)
-    importData(data) {
-        return this.setDatabase(data);
     }
 
     // ========== UTILITY METHODS ==========
@@ -519,44 +708,6 @@ class DataAPI {
         return errors;
     }
 
-    // Download JSON file
-    downloadJSON(data, filename) {
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    // Save database to file
-    saveDatabaseToFile() {
-        const timestamp = new Date().toISOString().split('T')[0];
-        this.downloadJSON(this.getDatabase(), `db_${timestamp}.json`);
-        console.log('💾 Database saved to file');
-    }
-
-    // Save backup
-    saveBackup() {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-        this.downloadJSON(this.exportData(), `abarroteria_backup_${timestamp}.json`);
-        console.log('💾 Backup created');
-    }
-
-    // Get database info
-    getDatabaseInfo() {
-        return {
-            categories: this.data.categories.length,
-            products: this.data.products.length,
-            lastUpdated: this.data.metadata.lastUpdated,
-            version: this.data.metadata.version,
-            created: this.data.metadata.created
-        };
-    }
-
     // Check server status
     async checkServerStatus() {
         try {
@@ -565,13 +716,7 @@ class DataAPI {
             });
             return response.ok;
         } catch (error) {
-            // Try a simple GET request as fallback
-            try {
-                const response = await fetch(this.endpoints.categories);
-                return response.ok;
-            } catch (secondError) {
-                return false;
-            }
+            return false;
         }
     }
 }

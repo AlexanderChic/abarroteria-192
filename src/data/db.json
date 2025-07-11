@@ -1,0 +1,232 @@
+{
+  "categories": [
+    {
+      "id": "1",
+      "name": "Abarrotes",
+      "description": "Productos básicos de despensa",
+      "subcategories": [
+        "Cereales",
+        "Enlatados",
+        "Condimentos",
+        "Pastas"
+      ],
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Bebidas",
+      "description": "Bebidas refrescantes y alcohólicas",
+      "subcategories": [
+        "Refrescos",
+        "Jugos",
+        "Agua",
+        "Cervezas"
+      ],
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "name": "Lácteos",
+      "description": "Productos lácteos y derivados",
+      "subcategories": [
+        "Leche",
+        "Yogurt",
+        "Quesos",
+        "Mantequilla"
+      ],
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "4",
+      "name": "Limpieza",
+      "description": "Productos de limpieza para el hogar",
+      "subcategories": [
+        "Detergentes",
+        "Jabones",
+        "Desinfectantes",
+        "Papel"
+      ],
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "1",
+      "name": "Coca Cola 2L",
+      "category": "2",
+      "subcategory": "Refrescos",
+      "buyPrice": 25,
+      "sellPrice": 35,
+      "supplier": "Coca Cola",
+      "stock": 50,
+      "description": "Refresco de cola de 2 litros",
+      "image": "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=300&h=300&fit=crop",
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "name": "Arroz San Miguel 1kg",
+      "category": "1",
+      "subcategory": "Cereales",
+      "buyPrice": 18,
+      "sellPrice": 25,
+      "supplier": "San Miguel",
+      "stock": 30,
+      "description": "Arroz blanco de primera calidad",
+      "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300&h=300&fit=crop",
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "name": "Leche Lala 1L",
+      "category": "3",
+      "subcategory": "Leche",
+      "buyPrice": 22,
+      "sellPrice": 28,
+      "supplier": "Lala",
+      "stock": 25,
+      "description": "Leche entera pasteurizada",
+      "image": "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&h=300&fit=crop",
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "4",
+      "name": "Pan Bimbo Integral",
+      "category": "1",
+      "subcategory": "Panadería",
+      "buyPrice": 30,
+      "sellPrice": 38,
+      "supplier": "Bimbo",
+      "stock": 15,
+      "description": "Pan de caja integral grande",
+      "image": "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=300&fit=crop",
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "5",
+      "name": "Detergente Ariel 1kg",
+      "category": "4",
+      "subcategory": "Detergentes",
+      "buyPrice": 45,
+      "sellPrice": 58,
+      "supplier": "P&G",
+      "stock": 20,
+      "description": "Detergente en polvo para ropa",
+      "image": "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=300&h=300&fit=crop",
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "6",
+      "name": "Yogurt Danone 1L",
+      "category": "3",
+      "subcategory": "Yogurt",
+      "buyPrice": 35,
+      "sellPrice": 42,
+      "supplier": "Danone",
+      "stock": 18,
+      "description": "Yogurt natural bebible",
+      "image": "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=300&h=300&fit=crop",
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "1",
+      "username": "pedidos",
+      "password": "pedidos12345",
+      "type": "admin",
+      "name": "Administrador",
+      "email": "admin@abarroteria.com",
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "username": "cliente",
+      "password": "cliente123",
+      "type": "client",
+      "name": "Cliente Demo",
+      "email": "cliente@email.com",
+      "createdAt": "2025-01-15T10:00:00.000Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "1",
+      "customer": {
+        "name": "Juan",
+        "lastname": "Pérez",
+        "phone": "123-456-7890",
+        "fullName": "Juan Pérez"
+      },
+      "delivery": {
+        "cluster": "Cluster 1",
+        "colony": "Jardines del Edén",
+        "address": "Casa #123, Calle Principal"
+      },
+      "items": [
+        {
+          "productId": "1",
+          "productName": "Coca Cola 2L",
+          "quantity": 2,
+          "unitPrice": 35,
+          "totalPrice": 70
+        }
+      ],
+      "total": 70,
+      "paymentMethod": "contra_entrega",
+      "notes": "",
+      "customerType": "guest",
+      "status": "pendiente",
+      "createdAt": "2025-01-15T11:00:00.000Z",
+      "updatedAt": "2025-01-15T11:00:00.000Z"
+    },
+    {
+      "id": "1752208237060z8ruv",
+      "customer": {
+        "name": "Francisco",
+        "lastname": "Chic",
+        "phone": "54957516",
+        "fullName": "Francisco Chic"
+      },
+      "delivery": {
+        "cluster": "Cluster 1",
+        "colony": "Jardines del Edén",
+        "address": "casa 195 .asd2asdasd"
+      },
+      "items": [
+        {
+          "productId": "2",
+          "productName": "Arroz San Miguel 1kg",
+          "quantity": 3,
+          "unitPrice": 25,
+          "totalPrice": 75
+        },
+        {
+          "productId": "1",
+          "productName": "Coca Cola 2L",
+          "quantity": 1,
+          "unitPrice": 35,
+          "totalPrice": 35
+        }
+      ],
+      "total": 110,
+      "paymentMethod": "contra_entrega",
+      "notes": "",
+      "customerType": "guest",
+      "status": "pendiente",
+      "createdAt": "2025-07-11T04:30:37.060Z",
+      "updatedAt": "2025-07-11T04:30:37.060Z"
+    }
+  ],
+  "settings": {
+    "storeName": "Abarrotería Jardines del Edén",
+    "currency": "MXN",
+    "lowStockThreshold": 10,
+    "version": "1.0"
+  },
+  "metadata": {
+    "version": "1.0",
+    "lastUpdated": "2025-01-15T10:00:00.000Z",
+    "created": "2025-01-15T10:00:00.000Z"
+  }
+}
