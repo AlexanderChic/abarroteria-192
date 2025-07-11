@@ -6,6 +6,7 @@ class GuestManager {
         this.categories = [];
         this.currentView = 'catalog';
         this.selectedProduct = null;
+        this.processingOrder = false; // ← Para prevenir múltiples pedidos
         
         this.init();
     }
@@ -417,128 +418,90 @@ class GuestManager {
         return isValid;
     }
 
-    // Modifica tu clase GuestManager agregando esta variable al constructor
-constructor() {
-    this.cart = [];
-    this.products = [];
-    this.categories = [];
-    this.currentView = 'catalog';
-    this.selectedProduct = null;
-    this.processingOrder = false; // ← AGREGAR ESTA LÍNEA
-    
-    this.init();
-}
+    // ========== COMPLETE ORDER - VERSIÓN CORREGIDA ==========
+    async completeOrder() {
+        // Prevenir múltiples clics
+        if (this.processingOrder) {
+            return;
+        }
 
-// Reemplaza tu función completeOrder() con esta versión mejorada:
-async completeOrder() {
-    // Prevenir múltiples clics
-    if (this.processingOrder) {
-        return;
+        if (!this.validateCheckoutForm()) {
+            this.showMessage('Por favor completa todos los campos requeridos', 'error');
+            return;
+        }
+
+        if (this.cart.length === 0) {
+            this.showMessage('El carrito está vacío', 'error');
+            return;
+        }
+
+        const orderData = {
+            customer: {
+                name: document.getElementById('customer-name').value.trim(),
+                lastname: document.getElementById('customer-lastname').value.trim(),
+                phone: document.getElementById('customer-phone').value.trim(),
+                fullName: `${document.getElementById('customer-name').value.trim()} ${document.getElementById('customer-lastname').value.trim()}`
+            },
+            delivery: {
+                cluster: document.getElementById('delivery-cluster').value,
+                colony: document.getElementById('delivery-colony').value,
+                address: document.getElementById('delivery-address').value.trim()
+            },
+            items: this.cart.map(item => ({
+                productId: item.id,
+                productName: item.name,
+                quantity: item.quantity,
+                unitPrice: item.sellPrice,
+                totalPrice: item.sellPrice * item.quantity
+            })),
+            total: this.cart.reduce((sum, item) => sum + (item.sellPrice * item.quantity), 0),
+            paymentMethod: 'contra_entrega',
+            notes: document.getElementById('order-notes').value.trim(),
+            customerType: 'guest'
+        };
+
+        try {
+            // Marcar como procesando
+            this.processingOrder = true;
+
+            // Deshabilitar botón y mostrar loading
+            const completeButton = document.getElementById('complete-order-btn');
+            completeButton.disabled = true;
+            completeButton.textContent = 'Procesando...';
+
+            // Create order
+            const order = await dataAPI.createOrder(orderData);
+
+            // ¡AQUÍ ESTÁ LA CLAVE! Limpiar carrito INMEDIATAMENTE después de crear el pedido
+            this.cart = [];
+            this.saveCartToStorage();
+            this.updateCartDisplay();
+
+            // Ocultar la navegación de checkout
+            document.getElementById('checkout-nav').style.display = 'none';
+
+            // Show confirmation modal
+            this.showOrderConfirmation(order);
+
+            // Limpiar formulario
+            document.getElementById('checkout-form').reset();
+            document.getElementById('delivery-colony').value = 'Jardines del Edén';
+
+            this.showMessage('¡Pedido creado exitosamente!', 'success');
+
+        } catch (error) {
+            console.error('❌ Error creating order:', error);
+            this.showMessage('Error al procesar el pedido. Intenta nuevamente.', 'error');
+        } finally {
+            // Resetear estado SIEMPRE
+            this.processingOrder = false;
+            
+            // Reset button
+            const completeButton = document.getElementById('complete-order-btn');
+            completeButton.disabled = false;
+            completeButton.textContent = '✅ Completar Pedido';
+        }
     }
-
-    if (!this.validateCheckoutForm()) {
-        this.showMessage('Por favor completa todos los campos requeridos', 'error');
-        return;
-    }
-
-    if (this.cart.length === 0) {
-        this.showMessage('El carrito está vacío', 'error');
-        return;
-    }
-
-    const orderData = {
-        customer: {
-            name: document.getElementById('customer-name').value.trim(),
-            lastname: document.getElementById('customer-lastname').value.trim(),
-            phone: document.getElementById('customer-phone').value.trim(),
-            fullName: `${document.getElementById('customer-name').value.trim()} ${document.getElementById('customer-lastname').value.trim()}`
-        },
-        delivery: {
-            cluster: document.getElementById('delivery-cluster').value,
-            colony: document.getElementById('delivery-colony').value,
-            address: document.getElementById('delivery-address').value.trim()
-        },
-        items: this.cart.map(item => ({
-            productId: item.id,
-            productName: item.name,
-            quantity: item.quantity,
-            unitPrice: item.sellPrice,
-            totalPrice: item.sellPrice * item.quantity
-        })),
-        total: this.cart.reduce((sum, item) => sum + (item.sellPrice * item.quantity), 0),
-        paymentMethod: 'contra_entrega',
-        notes: document.getElementById('order-notes').value.trim(),
-        customerType: 'guest'
-    };
-
-    try {
-        // Marcar como procesando
-        this.processingOrder = true;
-
-        // Deshabilitar botón y mostrar loading
-        const completeButton = document.getElementById('complete-order-btn');
-        completeButton.disabled = true;
-        completeButton.textContent = 'Procesando...';
-
-        // Create order
-        const order = await dataAPI.createOrder(orderData);
-
-        // ¡AQUÍ ESTÁ LA CLAVE! Limpiar carrito INMEDIATAMENTE después de crear el pedido
-        this.cart = [];
-        this.saveCartToStorage();
-        this.updateCartDisplay();
-
-        // Ocultar la navegación de checkout
-        document.getElementById('checkout-nav').style.display = 'none';
-
-        // Show confirmation modal
-        this.showOrderConfirmation(order);
-
-        // Limpiar formulario
-        document.getElementById('checkout-form').reset();
-        document.getElementById('delivery-colony').value = 'Jardines del Edén';
-
-        this.showMessage('¡Pedido creado exitosamente!', 'success');
-
-    } catch (error) {
-        console.error('❌ Error creating order:', error);
-        this.showMessage('Error al procesar el pedido. Intenta nuevamente.', 'error');
-    } finally {
-        // Resetear estado SIEMPRE
-        this.processingOrder = false;
-        
-        // Reset button
-        const completeButton = document.getElementById('complete-order-btn');
-        completeButton.disabled = false;
-        completeButton.textContent = '✅ Completar Pedido';
-    }
-}
-
-// También mejora tu función startNewOrder():
-startNewOrder() {
-    // Cerrar modal
-    document.getElementById('order-confirmation-modal').style.display = 'none';
-    
-    // Ir al catálogo
-    this.showView('catalog');
-    
-    // Asegurar que el carrito esté vacío y actualizado
-    this.cart = [];
-    this.saveCartToStorage();
-    this.updateCartDisplay();
-    
-    // Reset form completo
-    document.getElementById('checkout-form').reset();
-    document.getElementById('delivery-colony').value = 'Jardines del Edén';
-    
-    // Ocultar navegación de checkout
-    document.getElementById('checkout-nav').style.display = 'none';
-    
-    // Resetear estado de procesamiento
-    this.processingOrder = false;
-    
-    this.showMessage('¡Listo para un nuevo pedido!', 'success');
-}
 
     showOrderConfirmation(order) {
         document.getElementById('order-number').textContent = order.id;
@@ -555,15 +518,30 @@ startNewOrder() {
         document.getElementById('order-confirmation-modal').style.display = 'block';
     }
 
+    // ========== START NEW ORDER - VERSIÓN MEJORADA ==========
     startNewOrder() {
+        // Cerrar modal
         document.getElementById('order-confirmation-modal').style.display = 'none';
+        
+        // Ir al catálogo
         this.showView('catalog');
+        
+        // Asegurar que el carrito esté vacío y actualizado
+        this.cart = [];
+        this.saveCartToStorage();
         this.updateCartDisplay();
         
-        // Reset form
+        // Reset form completo
         document.getElementById('checkout-form').reset();
         document.getElementById('delivery-colony').value = 'Jardines del Edén';
+        
+        // Ocultar navegación de checkout
         document.getElementById('checkout-nav').style.display = 'none';
+        
+        // Resetear estado de procesamiento
+        this.processingOrder = false;
+        
+        this.showMessage('¡Listo para un nuevo pedido!', 'success');
     }
 
     // ========== NAVIGATION ==========
