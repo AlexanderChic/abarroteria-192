@@ -14,13 +14,21 @@ class DataAPI {
         this.isInitialized = false;
         this.currentUser = null;
         
-        // JSON Server endpoints - LOCAL
-        this.baseURL = 'https://abarroteria-192-production.up.railway.app/api';
+        // JSON Server endpoints - RAILWAY CORRECTED
+        // Railway URLs ya incluyen https://, no agregues el protocolo
+        this.baseURL = 'https://abarroteria-192-production.up.railway.app';
         this.endpoints = {
             categories: `${this.baseURL}/categories`,
             products: `${this.baseURL}/products`,
             users: `${this.baseURL}/users`,
-            metadata: `${this.baseURL}/metadata`
+            metadata: `${this.baseURL}/metadata`,
+            orders: `${this.baseURL}/orders`
+        };
+        
+        // Agregar headers para CORS si es necesario
+        this.defaultHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         };
     }
 
@@ -29,12 +37,22 @@ class DataAPI {
     // Login user
     async login(username, password, userType) {
         try {
-            const response = await fetch(this.endpoints.users);
+            console.log('🔐 Attempting login to:', this.endpoints.users);
+            
+            const response = await fetch(this.endpoints.users, {
+                method: 'GET',
+                headers: this.defaultHeaders
+            });
+            
+            console.log('Response status:', response.status);
+            
             if (!response.ok) {
-                throw new Error('Failed to fetch users');
+                throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
             }
             
             const users = await response.json();
+            console.log('Users loaded:', users.length);
+            
             const user = users.find(u => 
                 u.username === username && 
                 u.password === password && 
@@ -102,10 +120,13 @@ class DataAPI {
     // Get all orders (admin only)
     async getOrders() {
         try {
-            const response = await fetch(`${this.baseURL}/orders`);
+            const response = await fetch(this.endpoints.orders, {
+                headers: this.defaultHeaders
+            });
             if (response.ok) {
                 return await response.json();
             }
+            console.warn('Failed to fetch orders:', response.status);
             return [];
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -124,11 +145,9 @@ class DataAPI {
         };
         
         try {
-            const response = await fetch(`${this.baseURL}/orders`, {
+            const response = await fetch(this.endpoints.orders, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.defaultHeaders,
                 body: JSON.stringify(newOrder)
             });
 
@@ -137,7 +156,7 @@ class DataAPI {
                 console.log('➕ Order created:', savedOrder.id);
                 return savedOrder;
             } else {
-                throw new Error('Failed to save order to server');
+                throw new Error(`Failed to save order: ${response.status}`);
             }
         } catch (error) {
             console.error('Error creating order:', error);
@@ -148,11 +167,9 @@ class DataAPI {
     // Update order status
     async updateOrderStatus(orderId, status) {
         try {
-            const response = await fetch(`${this.baseURL}/orders/${orderId}`, {
+            const response = await fetch(`${this.endpoints.orders}/${orderId}`, {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.defaultHeaders,
                 body: JSON.stringify({ 
                     status: status,
                     updatedAt: new Date().toISOString()
@@ -163,7 +180,7 @@ class DataAPI {
                 console.log('✏️ Order status updated:', orderId, status);
                 return await response.json();
             } else {
-                throw new Error('Failed to update order status');
+                throw new Error(`Failed to update order: ${response.status}`);
             }
         } catch (error) {
             console.error('Error updating order status:', error);
@@ -174,15 +191,16 @@ class DataAPI {
     // Delete order
     async deleteOrder(orderId) {
         try {
-            const response = await fetch(`${this.baseURL}/orders/${orderId}`, {
-                method: 'DELETE'
+            const response = await fetch(`${this.endpoints.orders}/${orderId}`, {
+                method: 'DELETE',
+                headers: this.defaultHeaders
             });
 
             if (response.ok) {
                 console.log('🗑️ Order deleted:', orderId);
                 return true;
             } else {
-                throw new Error('Failed to delete order');
+                throw new Error(`Failed to delete order: ${response.status}`);
             }
         } catch (error) {
             console.error('Error deleting order:', error);
@@ -195,6 +213,9 @@ class DataAPI {
         if (this.isInitialized) return;
         
         try {
+            console.log('🚀 Initializing API connection...');
+            console.log('Base URL:', this.baseURL);
+            
             await this.loadFromServer();
             this.isInitialized = true;
             console.log('✅ Data API initialized successfully with JSON Server');
@@ -210,15 +231,30 @@ class DataAPI {
     // Load data from JSON Server
     async loadFromServer() {
         try {
+            console.log('📡 Fetching data from server...');
+            
+            // Test server connection first
+            const testResponse = await fetch(this.baseURL, {
+                method: 'GET',
+                headers: this.defaultHeaders
+            });
+            
+            console.log('Server test response:', testResponse.status);
+            
             const [categoriesResponse, productsResponse, usersResponse, metadataResponse] = await Promise.all([
-                fetch(this.endpoints.categories),
-                fetch(this.endpoints.products),
-                fetch(this.endpoints.users),
-                fetch(this.endpoints.metadata)
+                fetch(this.endpoints.categories, { headers: this.defaultHeaders }),
+                fetch(this.endpoints.products, { headers: this.defaultHeaders }),
+                fetch(this.endpoints.users, { headers: this.defaultHeaders }),
+                fetch(this.endpoints.metadata, { headers: this.defaultHeaders })
             ]);
 
+            console.log('Categories response:', categoriesResponse.status);
+            console.log('Products response:', productsResponse.status);
+            console.log('Users response:', usersResponse.status);
+            console.log('Metadata response:', metadataResponse.status);
+
             if (!categoriesResponse.ok || !productsResponse.ok) {
-                throw new Error('Failed to fetch from JSON Server');
+                throw new Error(`Failed to fetch from JSON Server: Categories(${categoriesResponse.status}), Products(${productsResponse.status})`);
             }
 
             this.data.categories = await categoriesResponse.json();
@@ -227,15 +263,21 @@ class DataAPI {
             // Users might not exist initially
             if (usersResponse.ok) {
                 this.data.users = await usersResponse.json();
+            } else {
+                console.log('Users endpoint not available, using defaults');
+                this.data.users = this.getDefaultUsers();
             }
             
             // Metadata might not exist initially
             if (metadataResponse.ok) {
                 this.data.metadata = await metadataResponse.json();
+            } else {
+                console.log('Metadata endpoint not available, using defaults');
             }
             
             console.log('📂 Data loaded from JSON Server successfully');
         } catch (error) {
+            console.error('❌ JSON Server connection failed:', error);
             throw new Error(`JSON Server connection failed: ${error.message}`);
         }
     }
@@ -275,6 +317,15 @@ class DataAPI {
                 name: "Cliente Demo",
                 email: "cliente@email.com",
                 createdAt: new Date().toISOString()
+            },
+            {
+                id: "3",
+                username: "pedidos",
+                password: "pedidos123",
+                type: "client",
+                name: "Usuario Pedidos",
+                email: "pedidos@email.com",
+                createdAt: new Date().toISOString()
             }
         ];
     }
@@ -285,9 +336,7 @@ class DataAPI {
         try {
             await fetch(this.endpoints.metadata, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.defaultHeaders,
                 body: JSON.stringify(this.data.metadata)
             });
         } catch (error) {
@@ -353,9 +402,7 @@ class DataAPI {
         try {
             const response = await fetch(this.endpoints.categories, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.defaultHeaders,
                 body: JSON.stringify(newCategory)
             });
 
@@ -366,7 +413,7 @@ class DataAPI {
                 console.log('➕ Category added:', savedCategory.name);
                 return savedCategory;
             } else {
-                throw new Error('Failed to save category to server');
+                throw new Error(`Failed to save category: ${response.status}`);
             }
         } catch (error) {
             // Fallback to local storage
@@ -390,9 +437,7 @@ class DataAPI {
         try {
             const response = await fetch(`${this.endpoints.categories}/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.defaultHeaders,
                 body: JSON.stringify(updatedCategory)
             });
 
@@ -402,7 +447,7 @@ class DataAPI {
                 console.log('✏️ Category updated:', updatedCategory.name);
                 return updatedCategory;
             } else {
-                throw new Error('Failed to update category on server');
+                throw new Error(`Failed to update category: ${response.status}`);
             }
         } catch (error) {
             // Fallback to local update
@@ -425,7 +470,8 @@ class DataAPI {
         
         try {
             const response = await fetch(`${this.endpoints.categories}/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: this.defaultHeaders
             });
 
             if (response.ok) {
@@ -434,7 +480,7 @@ class DataAPI {
                 console.log('🗑️ Category deleted:', deleted.name);
                 return true;
             } else {
-                throw new Error('Failed to delete category from server');
+                throw new Error(`Failed to delete category: ${response.status}`);
             }
         } catch (error) {
             // Fallback to local deletion
@@ -476,9 +522,7 @@ class DataAPI {
         try {
             const response = await fetch(this.endpoints.products, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.defaultHeaders,
                 body: JSON.stringify(newProduct)
             });
 
@@ -489,7 +533,7 @@ class DataAPI {
                 console.log('➕ Product added:', savedProduct.name);
                 return savedProduct;
             } else {
-                throw new Error('Failed to save product to server');
+                throw new Error(`Failed to save product: ${response.status}`);
             }
         } catch (error) {
             // Fallback to local storage
@@ -513,9 +557,7 @@ class DataAPI {
         try {
             const response = await fetch(`${this.endpoints.products}/${id}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: this.defaultHeaders,
                 body: JSON.stringify(updatedProduct)
             });
 
@@ -525,7 +567,7 @@ class DataAPI {
                 console.log('✏️ Product updated:', updatedProduct.name);
                 return updatedProduct;
             } else {
-                throw new Error('Failed to update product on server');
+                throw new Error(`Failed to update product: ${response.status}`);
             }
         } catch (error) {
             // Fallback to local update
@@ -542,7 +584,8 @@ class DataAPI {
         
         try {
             const response = await fetch(`${this.endpoints.products}/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: this.defaultHeaders
             });
 
             if (response.ok) {
@@ -551,7 +594,7 @@ class DataAPI {
                 console.log('🗑️ Product deleted:', deleted.name);
                 return true;
             } else {
-                throw new Error('Failed to delete product from server');
+                throw new Error(`Failed to delete product: ${response.status}`);
             }
         } catch (error) {
             // Fallback to local deletion
@@ -711,11 +754,45 @@ class DataAPI {
     // Check server status
     async checkServerStatus() {
         try {
-            const response = await fetch(`${this.baseURL}/categories`, {
-                method: 'HEAD'
+            console.log('🔍 Checking server status...');
+            const response = await fetch(this.baseURL, {
+                method: 'GET',
+                headers: this.defaultHeaders
             });
+            console.log('Server status check:', response.status);
             return response.ok;
         } catch (error) {
+            console.error('Server status check failed:', error);
+            return false;
+        }
+    }
+
+    // Test connection with detailed logging
+    async testConnection() {
+        console.log('🧪 Testing API connection...');
+        console.log('Base URL:', this.baseURL);
+        
+        try {
+            const response = await fetch(this.baseURL, {
+                method: 'GET',
+                headers: this.defaultHeaders
+            });
+            
+            console.log('Connection test result:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok,
+                url: response.url
+            });
+            
+            if (response.ok) {
+                const data = await response.text();
+                console.log('Response data:', data.substring(0, 200) + '...');
+            }
+            
+            return response.ok;
+        } catch (error) {
+            console.error('Connection test failed:', error);
             return false;
         }
     }
