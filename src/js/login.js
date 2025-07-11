@@ -156,7 +156,7 @@ class LoginManager {
         
         // Redirect based on user type
         if (user.type === 'admin') {
-            window.location.href = 'public/admin.html'; // Admin dashboard
+            window.location.href = 'admin.html'; // Admin dashboard
         } else {
             this.showMessage('Tipo de usuario no válido', 'error');
         }
@@ -248,7 +248,7 @@ function enterAsGuest() {
     dataAPI.currentUser = guestUser;
     
     // Redirect to guest view
-    window.location.href = 'public/guest.html';
+    window.location.href = 'guest.html';
 }
 
 // Initialize login manager when script loads
