@@ -503,46 +503,120 @@ class GuestManager {
         }
     }
 
-    showOrderConfirmation(order) {
-        document.getElementById('order-number').textContent = order.id;
-        
-        const orderDetails = document.getElementById('order-details');
-        orderDetails.innerHTML = `
-            <p><strong>Cliente:</strong> ${order.customer.fullName}</p>
-            <p><strong>Teléfono:</strong> ${order.customer.phone}</p>
-            <p><strong>Dirección:</strong> ${order.delivery.cluster}, ${order.delivery.colony}</p>
-            <p><strong>Total:</strong> Q${order.total.toFixed(2)}</p>
-            <p><strong>Método de pago:</strong> Contra entrega</p>
-        `;
+    // Actualiza estas funciones en tu guest.js
 
-        document.getElementById('order-confirmation-modal').style.display = 'block';
-    }
+// ========== FUNCIÓN ACTUALIZADA PARA MOSTRAR TICKET EN MODAL ==========
+showOrderConfirmation(order) {
+    // Llenar información del ticket
+    document.getElementById('ticket-order-number').textContent = order.id;
+    document.getElementById('ticket-date').textContent = new Date().toLocaleString('es-GT');
+    document.getElementById('ticket-customer-name').textContent = order.customer.fullName;
+    document.getElementById('ticket-customer-phone').textContent = order.customer.phone;
+    document.getElementById('ticket-customer-address').textContent = 
+        `${order.delivery.address}, ${order.delivery.cluster}, ${order.delivery.colony}`;
+    document.getElementById('ticket-total').textContent = order.total.toFixed(2);
 
-    // ========== START NEW ORDER - VERSIÓN MEJORADA ==========
-    startNewOrder() {
-        // Cerrar modal
-        document.getElementById('order-confirmation-modal').style.display = 'none';
-        
-        // Ir al catálogo
-        this.showView('catalog');
-        
-        // Asegurar que el carrito esté vacío y actualizado
-        this.cart = [];
-        this.saveCartToStorage();
-        this.updateCartDisplay();
-        
-        // Reset form completo
-        document.getElementById('checkout-form').reset();
-        document.getElementById('delivery-colony').value = 'Jardines del Edén';
-        
-        // Ocultar navegación de checkout
-        document.getElementById('checkout-nav').style.display = 'none';
-        
-        // Resetear estado de procesamiento
-        this.processingOrder = false;
-        
-        this.showMessage('¡Listo para un nuevo pedido!', 'success');
+    // Llenar lista de productos
+    const itemsList = document.getElementById('ticket-items-list');
+    itemsList.innerHTML = order.items.map(item => `
+        <div class="table-row">
+            <span>${item.productName}</span>
+            <span>${item.quantity}</span>
+            <span>Q${item.unitPrice.toFixed(2)}</span>
+            <span>Q${item.totalPrice.toFixed(2)}</span>
+        </div>
+    `).join('');
+
+    // Mostrar el modal
+    document.getElementById('order-confirmation-modal').style.display = 'block';
+}
+
+// ========== FUNCIÓN PARA CERRAR EL MODAL DEL TICKET ==========
+closeTicketModal() {
+    document.getElementById('order-confirmation-modal').style.display = 'none';
+}
+
+// ========== START NEW ORDER - VERSIÓN MEJORADA ==========
+startNewOrder() {
+    // Cerrar modal
+    this.closeTicketModal();
+    
+    // Ir al catálogo
+    this.showView('catalog');
+    
+    // Asegurar que el carrito esté vacío y actualizado
+    this.cart = [];
+    this.saveCartToStorage();
+    this.updateCartDisplay();
+    
+    // Reset form completo
+    document.getElementById('checkout-form').reset();
+    document.getElementById('delivery-colony').value = 'Jardines del Edén';
+    
+    // Ocultar navegación de checkout
+    document.getElementById('checkout-nav').style.display = 'none';
+    
+    // Resetear estado de procesamiento
+    this.processingOrder = false;
+    
+    this.showMessage('¡Listo para un nuevo pedido!', 'success');
+}
+
+// ========== FUNCIÓN PARA DESCARGAR/GUARDAR TICKET ==========
+downloadTicket() {
+    // Función simple para "guardar" el ticket (puedes implementar screenshot o print)
+    if (navigator.share) {
+        // Si el dispositivo soporta Web Share API
+        const ticketText = this.generateTicketText();
+        navigator.share({
+            title: 'Ticket de Compra - Abarrotería Jardines del Edén',
+            text: ticketText
+        }).catch(console.error);
+    } else {
+        // Fallback: abrir ventana de impresión
+        window.print();
     }
+}
+
+// ========== FUNCIÓN PARA GENERAR TEXTO DEL TICKET ==========
+generateTicketText() {
+    const orderNumber = document.getElementById('ticket-order-number').textContent;
+    const customerName = document.getElementById('ticket-customer-name').textContent;
+    const customerPhone = document.getElementById('ticket-customer-phone').textContent;
+    const customerAddress = document.getElementById('ticket-customer-address').textContent;
+    const total = document.getElementById('ticket-total').textContent;
+    const date = document.getElementById('ticket-date').textContent;
+
+    let ticketText = `
+🎫 TICKET DE COMPRA
+Abarrotería Jardines del Edén
+
+📋 Pedido #${orderNumber}
+📅 Fecha: ${date}
+
+👤 CLIENTE:
+Nombre: ${customerName}
+Teléfono: ${customerPhone}
+Dirección: ${customerAddress}
+
+🛒 PRODUCTOS:
+`;
+
+    // Agregar productos
+    this.cart.forEach(item => {
+        ticketText += `${item.name} - Cant: ${item.quantity} - Q${(item.sellPrice * item.quantity).toFixed(2)}\n`;
+    });
+
+    ticketText += `
+💰 TOTAL: Q${total}
+Método de pago: Contra entrega
+🚚 Tiempo estimado: 30-60 minutos
+
+¡Gracias por tu compra!
+    `;
+
+    return ticketText;
+}
 
     // ========== NAVIGATION ==========
 
