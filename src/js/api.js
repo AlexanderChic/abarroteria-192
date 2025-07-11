@@ -15,8 +15,8 @@ class DataAPI {
         this.currentUser = null;
         
         // JSON Server endpoints - RAILWAY CORRECTED
-        // Railway URLs ya incluyen https://, no agregues el protocolo
-        this.baseURL = 'https://abarroteria-192-production.up.railway.app';
+        // Railway URLs ya incluyen https://, AGREGAR /api/ prefix
+        this.baseURL = 'https://abarroteria-192-production.up.railway.app/api';
         this.endpoints = {
             categories: `${this.baseURL}/categories`,
             products: `${this.baseURL}/products`,
@@ -234,7 +234,7 @@ class DataAPI {
             console.log('📡 Fetching data from server...');
             
             // Test server connection first
-            const testResponse = await fetch(this.baseURL, {
+            const testResponse = await fetch(`${this.baseURL.replace('/api', '')}/health`, {
                 method: 'GET',
                 headers: this.defaultHeaders
             });
@@ -755,7 +755,7 @@ class DataAPI {
     async checkServerStatus() {
         try {
             console.log('🔍 Checking server status...');
-            const response = await fetch(this.baseURL, {
+            const response = await fetch(`${this.baseURL.replace('/api', '')}/health`, {
                 method: 'GET',
                 headers: this.defaultHeaders
             });
@@ -773,24 +773,38 @@ class DataAPI {
         console.log('Base URL:', this.baseURL);
         
         try {
-            const response = await fetch(this.baseURL, {
+            // Test health endpoint
+            const healthResponse = await fetch(`${this.baseURL.replace('/api', '')}/health`, {
                 method: 'GET',
                 headers: this.defaultHeaders
             });
             
-            console.log('Connection test result:', {
-                status: response.status,
-                statusText: response.statusText,
-                ok: response.ok,
-                url: response.url
+            console.log('Health check result:', {
+                status: healthResponse.status,
+                statusText: healthResponse.statusText,
+                ok: healthResponse.ok,
+                url: healthResponse.url
+            });
+
+            // Test categories endpoint
+            const categoriesResponse = await fetch(this.endpoints.categories, {
+                method: 'GET',
+                headers: this.defaultHeaders
             });
             
-            if (response.ok) {
-                const data = await response.text();
-                console.log('Response data:', data.substring(0, 200) + '...');
+            console.log('Categories endpoint result:', {
+                status: categoriesResponse.status,
+                statusText: categoriesResponse.statusText,
+                ok: categoriesResponse.ok,
+                url: categoriesResponse.url
+            });
+            
+            if (categoriesResponse.ok) {
+                const data = await categoriesResponse.json();
+                console.log('Categories data:', data);
             }
             
-            return response.ok;
+            return categoriesResponse.ok;
         } catch (error) {
             console.error('Connection test failed:', error);
             return false;
