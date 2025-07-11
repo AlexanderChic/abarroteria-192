@@ -145,189 +145,115 @@
             </div>
         </div>
 
-        <!-- Ticket View - Agregar después de la vista checkout en guest.html -->
-<div id="ticket" class="view">
-    <div class="ticket-container">
-        <div class="ticket-header">
-            <h2>🎫 Ticket de Compra</h2>
-            <div class="ticket-status">
-                <span class="status-badge success">✅ Pedido Confirmado</span>
+        <!-- Order Confirmation Modal con Ticket Detallado -->
+        <div id="order-confirmation-modal" class="modal" style="display: none;">
+            <div class="modal-content ticket-modal">
+                <div class="modal-header">
+                    <h3>🎫 Ticket de Compra</h3>
+                    <span class="close" onclick="closeTicketModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="ticket-content">
+                        <div class="ticket-status">
+                            <span class="status-badge success">✅ Pedido Confirmado</span>
+                        </div>
+
+                        <div class="ticket-info">
+                            <div class="ticket-number">
+                                <h4>📋 Pedido #<span id="ticket-order-number"></span></h4>
+                                <p class="ticket-date" id="ticket-date"></p>
+                            </div>
+
+                            <div class="customer-info">
+                                <h4>👤 Información del Cliente</h4>
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <strong>Nombre:</strong> <span id="ticket-customer-name"></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <strong>Teléfono:</strong> <span id="ticket-customer-phone"></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <strong>Dirección:</strong> <span id="ticket-customer-address"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="order-items">
+                                <h4>🛒 Productos Ordenados</h4>
+                                <div class="items-table">
+                                    <div class="table-header">
+                                        <span>Producto</span>
+                                        <span>Cant.</span>
+                                        <span>Precio</span>
+                                        <span>Total</span>
+                                    </div>
+                                    <div id="ticket-items-list"></div>
+                                </div>
+                            </div>
+
+                            <div class="payment-info">
+                                <h4>💰 Información de Pago</h4>
+                                <div class="payment-details">
+                                    <div class="payment-item">
+                                        <span>Método de pago:</span>
+                                        <span><strong>Pago contra entrega</strong></span>
+                                    </div>
+                                    <div class="payment-item total">
+                                        <span><strong>Total a pagar:</strong></span>
+                                        <span><strong>Q<span id="ticket-total"></span></strong></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="delivery-info">
+                                <h4>🚚 Información de Entrega</h4>
+                                <p>Tu pedido será entregado en la dirección especificada.</p>
+                                <p><strong>Tiempo estimado:</strong> 30-60 minutos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="downloadTicket()">📸 Guardar Captura</button>
+                    <button class="btn btn-success" onclick="startNewOrder()">🛍️ Hacer Nuevo Pedido</button>
+                </div>
             </div>
         </div>
 
-        <div class="ticket-content" id="ticket-content">
-            <div class="ticket-info">
-                <div class="ticket-number">
-                    <h3>📋 Pedido #<span id="ticket-order-number"></span></h3>
-                    <p class="ticket-date" id="ticket-date"></p>
+        <!-- Product Modal -->
+        <div id="product-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-product-name">Producto</h3>
+                    <span class="close" onclick="closeProductModal()">&times;</span>
                 </div>
-
-                <div class="customer-info">
-                    <h4>👤 Información del Cliente</h4>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <strong>Nombre:</strong> <span id="ticket-customer-name"></span>
+                <div class="modal-body">
+                    <div class="product-modal-grid">
+                        <div class="product-image">
+                            <img id="modal-product-image" src="https://images.unsplash.com/photo-1586380951230-d3be9b34b8f5?w=300&h=300&fit=crop" alt="Producto">
                         </div>
-                        <div class="info-item">
-                            <strong>Teléfono:</strong> <span id="ticket-customer-phone"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Dirección:</strong> <span id="ticket-customer-address"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="order-items">
-                    <h4>🛒 Productos Ordenados</h4>
-                    <div class="items-table">
-                        <div class="table-header">
-                            <span>Producto</span>
-                            <span>Cantidad</span>
-                            <span>Precio Unit.</span>
-                            <span>Total</span>
-                        </div>
-                        <div id="ticket-items-list"></div>
-                    </div>
-                </div>
-
-                <div class="payment-info">
-                    <h4>💰 Información de Pago</h4>
-                    <div class="payment-details">
-                        <div class="payment-item">
-                            <span>Método de pago:</span>
-                            <span><strong>Pago contra entrega</strong></span>
-                        </div>
-                        <div class="payment-item total">
-                            <span><strong>Total a pagar:</strong></span>
-                            <span><strong>Q<span id="ticket-total"></span></strong></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="delivery-info">
-                    <h4>🚚 Información de Entrega</h4>
-                    <p>Tu pedido será entregado en la dirección especificada.</p>
-                    <p><strong>Tiempo estimado:</strong> 30-60 minutos</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="ticket-actions">
-            <button class="btn btn-secondary" onclick="downloadTicket()">📸 Guardar Captura</button>
-            <button class="btn btn-success" onclick="finishOrder()">🛍️ Hacer Nuevo Pedido</button>
-        </div>
-    </div>
-</div>
-
-      <!-- Reemplaza el modal de confirmación existente con este código mejorado -->
-<!-- Order Confirmation Modal con Ticket Detallado -->
-<div id="order-confirmation-modal" class="modal" style="display: none;">
-    <div class="modal-content ticket-modal">
-        <div class="modal-header">
-            <h3>🎫 Ticket de Compra</h3>
-            <span class="close" onclick="closeTicketModal()">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="ticket-content">
-                <div class="ticket-status">
-                    <span class="status-badge success">✅ Pedido Confirmado</span>
-                </div>
-
-                <div class="ticket-info">
-                    <div class="ticket-number">
-                        <h4>📋 Pedido #<span id="ticket-order-number"></span></h4>
-                        <p class="ticket-date" id="ticket-date"></p>
-                    </div>
-
-                    <div class="customer-info">
-                        <h4>👤 Información del Cliente</h4>
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <strong>Nombre:</strong> <span id="ticket-customer-name"></span>
-                            </div>
-                            <div class="info-item">
-                                <strong>Teléfono:</strong> <span id="ticket-customer-phone"></span>
-                            </div>
-                            <div class="info-item">
-                                <strong>Dirección:</strong> <span id="ticket-customer-address"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="order-items">
-                        <h4>🛒 Productos Ordenados</h4>
-                        <div class="items-table">
-                            <div class="table-header">
-                                <span>Producto</span>
-                                <span>Cant.</span>
-                                <span>Precio</span>
-                                <span>Total</span>
-                            </div>
-                            <div id="ticket-items-list"></div>
-                        </div>
-                    </div>
-
-                    <div class="payment-info">
-                        <h4>💰 Información de Pago</h4>
-                        <div class="payment-details">
-                            <div class="payment-item">
-                                <span>Método de pago:</span>
-                                <span><strong>Pago contra entrega</strong></span>
-                            </div>
-                            <div class="payment-item total">
-                                <span><strong>Total a pagar:</strong></span>
-                                <span><strong>Q<span id="ticket-total"></span></strong></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="delivery-info">
-                        <h4>🚚 Información de Entrega</h4>
-                        <p>Tu pedido será entregado en la dirección especificada.</p>
-                        <p><strong>Tiempo estimado:</strong> 30-60 minutos</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="downloadTicket()">📸 Guardar Captura</button>
-            <button class="btn btn-success" onclick="startNewOrder()">🛍️ Hacer Nuevo Pedido</button>
-        </div>
-    </div>
-</div>
-
-    <!-- Product Modal -->
-    <div id="product-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-product-name">Producto</h3>
-                <span class="close" onclick="closeProductModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="product-modal-grid">
-                    <div class="product-image">
-                        <img id="modal-product-image" src="https://images.unsplash.com/photo-1586380951230-d3be9b34b8f5?w=300&h=300&fit=crop" alt="Producto">
-                    </div>
-                    <div class="product-details">
-                        <p><strong>Precio: Q</strong> $<span id="modal-product-price"></span></p>
-                        <p><strong>Disponible:</strong> <span id="modal-product-stock"></span> unidades</p>
-                        <p><strong>Descripción:</strong></p>
-                        <p id="modal-product-description"></p>
-                        
-                        <div class="quantity-selector">
-                            <label for="modal-quantity">Cantidad:</label>
-                            <div class="quantity-controls">
-                                <button type="button" onclick="changeQuantity(-1)">-</button>
-                                <input type="number" id="modal-quantity" value="1" min="1" max="1">
-                                <button type="button" onclick="changeQuantity(1)">+</button>
+                        <div class="product-details">
+                            <p><strong>Precio: Q</strong><span id="modal-product-price"></span></p>
+                            <p><strong>Disponible:</strong> <span id="modal-product-stock"></span> unidades</p>
+                            <p><strong>Descripción:</strong></p>
+                            <p id="modal-product-description"></p>
+                            
+                            <div class="quantity-selector">
+                                <label for="modal-quantity">Cantidad:</label>
+                                <div class="quantity-controls">
+                                    <button type="button" onclick="changeQuantity(-1)">-</button>
+                                    <input type="number" id="modal-quantity" value="1" min="1" max="1">
+                                    <button type="button" onclick="changeQuantity(1)">+</button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
-                <button class="btn btn-success" onclick="addToCartFromModal()" id="add-to-cart-btn">🛒 Agregar al Carrito</button>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeProductModal()">Cancelar</button>
+                    <button class="btn btn-success" onclick="addToCartFromModal()" id="add-to-cart-btn">🛒 Agregar al Carrito</button>
+                </div>
             </div>
         </div>
     </div>
