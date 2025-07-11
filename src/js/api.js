@@ -15,7 +15,7 @@ class DataAPI {
         this.currentUser = null;
         
         // JSON Server endpoints - LOCAL
-        this.baseURL = 'http://localhost:3000';
+        this.baseURL = 'abarroteria-192-production.up.railway.app';
         this.endpoints = {
             categories: `${this.baseURL}/categories`,
             products: `${this.baseURL}/products`,
